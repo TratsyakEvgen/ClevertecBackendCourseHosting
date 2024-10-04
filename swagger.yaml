@@ -1,0 +1,433 @@
+openapi: 3.0.3
+info:
+  title: Видеохостинг
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: users
+    description: Пользователи
+  - name: channels
+    description: Каналы
+paths:
+  /users:
+    post:
+      tags:
+        - users
+      summary: Регистрация пользователя
+      description: Регистарция пользователя. Никнейм пользователя должен быть уникальным
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDTO'
+        required: true
+      responses:
+        201:
+          description: Успешная опреция, возвращается id пользователя
+          content:
+            text/plain:
+              schema:
+                type: integer
+              example: 1
+        400:
+          description: Пользователь с данным никнеймом уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDTO'
+              example:
+                status: 400
+                message: User already exists
+        422:
+          description: Невлидные данные. Получаем список сообщений о невлидных полях разделенных "; "
+          content:
+            application/json:
+              schema:
+               $ref: '#/components/schemas/ErrorDTO'
+              example:
+               status: 422
+               message: Incorrect format email; Incorrect format nickname
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - users
+      summary: Обнавление инфорамции о пользователе
+      description: Обнавление инфорамции о пользователе.
+        Никнейм пользователя должен быть уникальным, id пользователя берется из JWT токена
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDTO'
+        required: true
+      responses:
+        200:
+          description: Успешная опреция
+        400:
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDTO'
+              example:
+                status: 400
+                message: Пользователь уже существует
+        422:
+          description: Невлидные данные. Получаем список сообщений о невлидных полях разделенных "; "
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDTO'
+              example:
+                status: 422
+                message: Incorrect format email; Incorrect format nickname
+  /users/channels:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - users
+      summary: Создание канала
+      description: Создание канала, id автора берется из JWT токена, дата создания генерируется приложением
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChannelDTO'
+        required: true
+      responses:
+        201:
+          description: Успешная опреция, возвращается id канала
+          content:
+            text/plain:
+              schema:
+                type: integer
+              example: 1
+        404:
+          description: Не найдена категория или язык
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDTO'
+              example:
+                status: 404
+                message: Категория не найдена
+        422:
+          description: Невлидные данные. Получаем список сообщений о невлидных полях разделенных "; "
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDTO'
+              example:
+                status: 422
+                message: Incorrect format name; Incorrect format description
+  /users/channels/{id}:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - users
+      summary: Подписка на канал
+      description: Подписка на канал, id пользователя берется из JWT токена
+      responses:
+        200:
+          description: Успешная опреция
+        404:
+          description: Канал не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDTO'
+              example:
+                status: 404
+                message: Channel not found
+    put:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - users
+      summary: Редактирование канала
+      description: Редактирование канала, id пользователя берется из JWT токена
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChannelDTO'
+        required: true
+      responses:
+        201:
+          description: Успешная опреция
+          content:
+            text/plain:
+              schema:
+                type: integer
+              example: 1
+        404:
+          description: Не найдена канал, категория или язык
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDTO'
+              example:
+                status: 404
+                message: Channel not found
+        422:
+          description: Невлидные данные. Получаем список сообщений о невлидных полях разделенных "; "
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDTO'
+              example:
+                status: 422
+                message: Incorrect format name; Incorrect format description
+    delete:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - users
+      summary: Отписка пользователя с канала
+      description: Отписка пользователя с канала, id пользователя берется из JWT токена
+      responses:
+        200:
+          description: Успешная опреция
+        404:
+          description: Канал не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDTO'
+              example:
+                status: 404
+                message: Channel not found
+  /users/{id}/channels:
+    get:
+      tags:
+        - users
+      summary: Список всех подписок пользователя
+      responses:
+        200:
+          description: Успешная опреция
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscribeDTO'
+        404:
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDTO'
+              example:
+                status: 404
+                message: User not found
+  /channels:
+    post:
+      tags:
+        - channels
+      summary: Список всех каналов
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChannelFilterDTO'
+        required: true
+      responses:
+        200:
+          description: Успешная опреция
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageChannelDTO'
+        422:
+          description: Невлидные данные. Получаем список сообщений о невлидных полях разделенных "; "
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDTO'
+              example:
+                status: 422
+                message:  Page number must be greater than 0;  Size must be greater than 1
+  /channels/{id}:
+    get:
+      tags:
+        - channels
+      summary: Полная иформация по каналу
+      responses:
+        200:
+          description: Успешная опреция
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChannelInfoDTO'
+        404:
+          description: Канал не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDTO'
+              example:
+                status: 404
+                message: Channel not found
+components:
+  schemas:
+    ErrorDTO:
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+    UserDTO:
+      type: object
+      properties:
+        nickName:
+          type: string
+          pattern: ^\S.*
+          example: Vania123
+        password:
+          type: string
+          pattern: ^\S.*
+          example: qwerty
+        name:
+          type: string
+          pattern: ^[А-ЯЁ][a-яА-ЯЁё-]+$
+          example: Иван
+        email:
+          type: string
+          pattern: ^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$
+          example: vania@email.com
+    ChannelDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          pattern: ^\S.*
+          example: Название канала
+        description:
+           type: string
+           pattern: ^\S.*
+           example: Краткое описание
+        languageId:
+          type: integer
+          minimum: 1
+          example: 1
+        image:
+          type: string
+          pattern: ^((https?|ftp|smtp):\/\/)?(www.)?[a-z0-9]+\.[a-z]+(\/[a-zA-Z0-9#]+\/?)*$
+          example: https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/a2d5bcae-a1a9-442f-8195-f5373a5ba77f/220x330
+        categoryId:
+          type: integer
+          minimum: 1
+          example: 1
+    SubscribeDTO:
+      type: object
+      properties:
+        channels:
+          type: array
+          items:
+            type: string
+            example: Название канала
+    ChannelFilterDTO:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 0
+          example: 1
+        size:
+          type: integer
+          minimum: 1
+          example: 1
+        name:
+          type: string
+          example: Название канала
+          required: false
+        categoryId:
+          type: integer
+          minimum: 1
+          example: 1
+          required: false
+        languageId:
+          type: integer
+          minimum: 1
+          example: 1
+          required: false
+    PageChannelDTO:
+      type: object
+      properties:
+        size:
+          type: integer
+          example: 1
+        page:
+          type: integer
+          example: 1
+        totalElements:
+          type: integer
+          example: 10
+        totalPage:
+          type: integer
+          example: 10
+        content:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: Название канала
+              countSubscribes:
+                type: integer
+                example: 323
+              language:
+                type: string
+                example: русский
+              category:
+                type: string
+                example: фильмы
+              image:
+                type: string
+                example:  https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/a2d5bcae-a1a9-442f-8195-f5373a5ba77f/220x330
+    ChannelInfoDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Название канала
+        countSubscribes:
+          type: integer
+          example: 323
+        language:
+          type: string
+          example: русский
+        category:
+          type: string
+          example: фильмы
+        image:
+          type: string
+          example: https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/a2d5bcae-a1a9-442f-8195-f5373a5ba77f/220x330
+        date:
+          type: string
+          format: date
+          example: 04.10.2024
+        author:
+          type: object
+          properties:
+            nickName:
+              type: string
+              example: Vania123
+            name:
+              type: string
+              example: Иван
+        description:
+          type: string
+          example: Краткое описание
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+
+
+
