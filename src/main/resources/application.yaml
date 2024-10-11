@@ -1,1 +1,22 @@
-
+spring:
+  application:
+    name: demo2
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/hosting
+    username: postgres
+    password: Traktaryst
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    locations: classpath:db.migration
+logging:
+  level:
+    org:
+      springframework:
+        transaction: debug
+        orm:
+          jpa: debug

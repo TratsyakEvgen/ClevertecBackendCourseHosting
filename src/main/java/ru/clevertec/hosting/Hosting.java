@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ClevertecBackendCourseHostingApplication {
+public class Hosting {
 
     public static void main(String[] args) {
-        SpringApplication.run(ClevertecBackendCourseHostingApplication.class, args);
+        SpringApplication.run(Hosting.class, args);
     }
 
 }
